@@ -23,8 +23,7 @@ int findContentChildren(vector<int>& children, vector<int>& cookies)
 
 	int child = 0, cookie = 0;
 	while (child < children.size() && cookie < cookies.size()) {
-		if (children[child] <= cookies[cookie])
-			child++;
+		if (children[child] <= cookies[cookie]) child++;
 		cookie++;
 	}
 
@@ -46,9 +45,7 @@ bool canPlaceFlowers(vector<int>& flowerbed, int n)
 	int max = 0;
 	for (size_t i = 0; i < size; ++i) {
 		if (flowerbed[i] == 1) {
-			if (indicator != 0) {
-				max--;
-			}
+			if (indicator != 0) { max--; }
 			indicator = 1;
 		}
 		else {
@@ -111,8 +108,7 @@ vector<int> partitionLabels(string s)
 			}
 		}
 
-		if (inside == false)
-			regions.push_back({i, char_info[s[i]]});
+		if (inside == false) regions.push_back({i, char_info[s[i]]});
 	}
 
 	vector<int> len;
@@ -131,8 +127,7 @@ int maxProfit(vector<int>& prices)
 
 	int prev = INT_MAX;
 	for (int i = 0; i < size; ++i) {
-		if (prices[i] > prev)
-			profit += (prices[i] - prev);
+		if (prices[i] > prev) profit += (prices[i] - prev);
 		prev = prices[i];
 	}
 
@@ -177,8 +172,7 @@ ListNode* detectCycle(ListNode* head)
 {
 	ListNode *fast = head, *slow = head;
 	do {
-		if (!fast || !fast->next)
-			return nullptr;
+		if (!fast || !fast->next) return nullptr;
 
 		fast = fast->next->next;
 		slow = slow->next;
@@ -226,8 +220,7 @@ bool judgeSquareSum(int c)
 bool validSubStr(string& s, int l, int r)
 {
 	while (l < r) {
-		if (s[l] != s[r])
-			return false;
+		if (s[l] != s[r]) return false;
 		++l;
 		--r;
 	}
@@ -277,9 +270,7 @@ string findLongestWord(string s, vector<string>& dictionary)
 
 		int cnt = 0;
 		for (int i = 0, j = 0; i < s.size() && j < word.size();) {
-			if (s[i] != word[j]) {
-				++i;
-			}
+			if (s[i] != word[j]) { ++i; }
 			else {
 				++i;
 				++j;
@@ -303,13 +294,11 @@ string findLongestWord(string s, vector<string>& dictionary)
 // 340
 int lengthOfLongestSubstringKDistinct(string s, int k)
 {
-	if (k == 0)
-		return 0;
+	if (k == 0) return 0;
 
 	int size = s.size();
 
-	if (k >= size)
-		return size;
+	if (k >= size) return size;
 
 	map<char, int> c_num;
 	int max = 0;
@@ -356,9 +345,7 @@ int lengthOfLongestSubstring(string s)
 
 	int l = 0, r = 0;
 	for (; r < size; ++r) {
-		if (chars.find(s[r]) == chars.end()) {
-			chars.insert(s[r]);
-		}
+		if (chars.find(s[r]) == chars.end()) { chars.insert(s[r]); }
 		else {
 			max = (r - l) > max ? (r - l) : max;
 			for (; l < r;) {
@@ -444,8 +431,7 @@ int lengthOfLongestSubstringTwoDistinct(string s)
 // 69
 int mySqrt(int x)
 {
-	if (x == 0)
-		return 0;
+	if (x == 0) return 0;
 	int l = 1, r = x;
 	int mid, sqrt;
 
@@ -467,8 +453,7 @@ int mySqrt(int x)
 // 367
 bool isPerfectSquare(int num)
 {
-	if (num == 1)
-		return true;
+	if (num == 1) return true;
 
 	int l = 1, r = num;
 
@@ -531,8 +516,7 @@ int quickSelection(vector<int>& nums, int l, int r)
 		while (l < j && nums[j] >= nums[l])
 			--j;
 
-		if (i >= j)
-			break;
+		if (i >= j) break;
 
 		swap(nums[i], nums[j]);
 	}
@@ -547,8 +531,7 @@ int findKthLargest(vector<int>& nums, int k)
 
 	while (l < r) {
 		int mid = quickSelection(nums, l, r);
-		if (mid == target)
-			return nums[mid];
+		if (mid == target) return nums[mid];
 
 		if (mid < target)
 			l = mid + 1;
@@ -632,8 +615,7 @@ void dfs(vector<vector<int>>& isConnected, vector<bool>& visited, int i)
 	visited[i] = true;
 
 	for (int k = 0; k < isConnected.size(); ++k) {
-		if (isConnected[i][k] && !visited[k])
-			dfs(isConnected, visited, k);
+		if (isConnected[i][k] && !visited[k]) dfs(isConnected, visited, k);
 	}
 }
 
@@ -661,8 +643,7 @@ void dfs(const vector<vector<int>>& matrix,
 		 int r,
 		 int c)
 {
-	if (can_reach[r][c])
-		return;
+	if (can_reach[r][c]) return;
 
 	can_reach[r][c] = true;
 
@@ -678,8 +659,7 @@ void dfs(const vector<vector<int>>& matrix,
 
 vector<vector<int>> pacificAtlantic(vector<vector<int>>& matrix)
 {
-	if (matrix.empty() || matrix[0].empty())
-		return {};
+	if (matrix.empty() || matrix[0].empty()) return {};
 
 	vector<vector<int>> res;
 
@@ -768,8 +748,7 @@ void backtracking(vector<vector<char>>& board,
 				  int c,
 				  bool& find)
 {
-	if (visited[r][c] || board[r][c] != word[i])
-		return;
+	if (visited[r][c] || board[r][c] != word[i]) return;
 
 	visited[r][c] = true;
 
@@ -787,8 +766,7 @@ void backtracking(vector<vector<char>>& board,
 		i++;
 
 		backtracking(board, word, i, visited, x, y, find);
-		if (find)
-			return;
+		if (find) return;
 		i--;
 	}
 
@@ -797,8 +775,7 @@ void backtracking(vector<vector<char>>& board,
 
 bool exist(vector<vector<char>>& board, string word)
 {
-	if (board.empty() || board[0].empty())
-		return false;
+	if (board.empty() || board[0].empty()) return false;
 	vector<vector<bool>> visited(board.size(),
 								 vector<bool>(board[0].size(), false));
 	bool find = false;
@@ -806,10 +783,61 @@ bool exist(vector<vector<char>>& board, string word)
 	for (int x = 0; x < board.size(); ++x) {
 		for (int y = 0; y < board[0].size(); ++y) {
 			backtracking(board, word, 0, visited, x, y, find);
-			if (find)
-				return true;
+			if (find) return true;
 		}
 	}
 
 	return find;
+}
+
+// 130
+void backtracking(vector<vector<char>>& board,
+				  vector<vector<bool>>& visited,
+				  vector<pair<int, int>>& points,
+				  char target,
+				  int r,
+				  int c)
+{
+	if (visited[r][c] || board[r][c] != target) return;
+
+	visited[r][c] = true;
+	points.push_back(pair<int, int>{r, c});
+
+	for (int i = 0; i < 4; i++) {
+		int x = r + direction[i], y = c + direction[i + 1];
+
+		if (x >= 0 && y >= 0 && x < board.size() && y < board[0].size()) {
+			backtracking(board, visited, points, target, x, y);
+		}
+	}
+}
+
+void solve(vector<vector<char>>& board)
+{
+	int m = board.size(), n = board[0].size();
+	vector<vector<bool>> visited(m, vector<bool>(n, false));
+
+	vector<pair<int, int>> points;
+
+	for (int i = 0; i < m; ++i) {
+		backtracking(board, visited, points, 'O', i, 0);
+		backtracking(board, visited, points, 'O', i, n - 1);
+	}
+
+	for (int i = 0; i < n; ++i) {
+		backtracking(board, visited, points, 'O', 0, i);
+		backtracking(board, visited, points, 'O', m - 1, i);
+	}
+
+	points.clear();
+
+	for (int i = 1; i < m - 1; i++) {
+		for (int j = 1; j < n - 1; j++) {
+			backtracking(board, visited, points, 'O', i, j);
+		}
+	}
+
+	for (const auto& point : points) {
+		board[point.first][point.second] = 'X';
+	}
 }
