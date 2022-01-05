@@ -841,3 +841,76 @@ void solve(vector<vector<char>>& board)
 		board[point.first][point.second] = 'X';
 	}
 }
+
+// 40
+void backtracking(map<int, int>& numCount,
+				  map<int, int>& numUsed,
+				  vector<vector<int>>& res,
+				  map<int, int>::iterator itor,
+				  int target,
+				  int level)
+{
+	if (itor->first > target) return;
+
+	if (itor->first == target) {
+		vector<int> combine;
+		for (auto it : numUsed) {
+			if (it.second > 0) {
+				combine.insert(combine.end(), it.second, it.first);
+			}
+		}
+		combine.push_back(itor->first);
+		res.push_back(combine);
+
+		return;
+	}
+
+	int i = level == 0 ? 1 : 0;
+	for (; i <= itor->second; ++i) {
+		if (itor->first * i > target) break;
+
+		numUsed[itor->first] = i;
+		int tag = target - i * itor->first;
+
+		if (tag == 0) {
+			vector<int> combine;
+			for (auto it : numUsed) {
+				if (it.second > 0) {
+					combine.insert(combine.end(), it.second, it.first);
+				}
+			}
+
+			res.push_back(combine);
+			break;
+		}
+
+		itor++;
+		if (itor == numCount.end()) { continue; }
+		backtracking(numCount, numUsed, res, itor, tag, ++level);
+
+		itor--;
+	}
+
+	numUsed[itor->first] = 0;
+}
+
+vector<vector<int>> combinationSum2(vector<int>& candidates, int target)
+{
+	vector<vector<int>> res;
+
+	map<int, int> numCount;
+	map<int, int> numUsed;
+	for (auto val : candidates) {
+		if (numCount.find(val) != numCount.end()) { numCount[val]++; }
+		else {
+			numCount[val] = 1;
+			numUsed[val] = 0;
+		}
+	}
+
+	for (auto itor = numCount.begin(); itor != numCount.end(); itor++) {
+		backtracking(numCount, numUsed, res, itor, target, 0);
+	}
+
+	return res;
+}
