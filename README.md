@@ -1,2 +1,2 @@
 # Leetcode
-Leetcode coing record
+Leetcode coding record
