@@ -276,8 +276,204 @@ void wiggleSort(vector<int>& nums) {
 	}
 }
 
+void traverse(TreeNode* node, int& maxD, int depth) {
+	if (node == nullptr)
+		return;
+
+	depth++;
+	maxD = max(maxD, depth);
+	traverse(node->left, maxD, depth);
+	traverse(node->right, maxD, depth);
+}
+
+int maxDepth(TreeNode* root) {
+	int maxD = 0;
+	traverse(root, maxD, 0);
+	return maxD;
+}
+
+int treeDepth(TreeNode* node) {
+	if (node == nullptr)
+		return 0;
+	int lh = treeDepth(node->left);
+	int rh = treeDepth(node->right);
+
+	if (lh == -1 || rh == -1)  // child tree nnot balanced
+		return -1;
+
+	if (lh - rh > 1 || lh - rh < -1)
+		return -1;
+
+	return max(lh, rh) + 1;
+}
+
+bool isBalanced(TreeNode* root) {
+	return treeDepth(root) != -1;
+}
+
+void traverse(TreeNode* node, vector<int>& elements) {
+	if (node == nullptr)
+		return;
+	traverse(node->left, elements);
+	elements.push_back(node->val);
+	traverse(node->right, elements);
+}
+
+void mergeTrees(TreeNode* root1, TreeNode* root2, vector<int>& elements) {
+	if (root1 == nullptr)
+	{
+		traverse(root2, elements);
+		return;
+	}
+	else if (root2 == nullptr)
+	{
+		traverse(root1, elements);
+		return;
+	}
+
+	TreeNode* minNode = root1->left;
+	if (minNode == nullptr)
+		minNode = root2->left;
+	else if (root2->left)
+		minNode = root1->left->val < root2->left->val ? minNode : root2->left;
+
+	traverse(minNode, elements);
+
+	if (minNode == root2->left)
+	{
+		if (root1->left)
+		{
+			if (root1->left->val >= root2->val)
+				elements.push_back(root2->val);
+			root2 = root2->right;
+		}
+	}
+
+	if (minNode == root2->left && root1->left && root1->left->val >= root2->val)
+	{
+		// collapse root2
+		// root2.left must be mini node
+		elements.push_back(root2->val);
+		root2 = root2->right;
+	}
+	else if (root2->left && root2->left->val >= root1->val)
+	{
+		// root1.left must be mini node
+		elements.push_back(root1->val);
+		root1 = root1->right;
+	}
+	else
+	{
+		if (minNode != root1->left)
+			traverse(root1->left, elements);
+		if (minNode != root2->left)
+			traverse(root2->left, elements);
+		if (root1->val < root2->val)
+		{
+			elements.push_back(root1->val);
+			root1 = root1->right;
+		}
+		else
+		{
+			elements.push_back(root2->val);
+			root2 = root2->right;
+		}
+	}
+
+	mergeTrees(root1, root2, elements);
+}
+
+vector<int> getAllElements(TreeNode* root1, TreeNode* root2) {
+	vector<int> allElements;
+	mergeTrees(root1, root2, allElements);
+	return allElements;
+}
+
+vector<vector<int>> transpose(vector<vector<int>>& matrix) {
+	int m = matrix.size();
+	int n = matrix[0].size();
+
+	vector<vector<int>> matT(n, vector<int>(m, 0));
+
+	for (int i = 0; i < n; ++i)
+	{
+		for (int j = 0; j < m; ++j)
+			matT[i][j] = matrix[j][i];
+	}
+	return matT;
+}
+
+int wiggleMaxLength(vector<int> nums) {
+	int n = nums.size();
+	if (n == 1)
+		return 1;
+
+	int maxLength = nums[0] == nums[1] ? 1 : 2;
+	int prevDiff = nums[1] - nums[0];
+
+	for (int i = 2; i < n; ++i)
+	{
+		int diff = nums[i] - nums[i - 1];
+		if (diff * prevDiff < 0)
+		{
+			maxLength++;
+			prevDiff = diff;
+		}
+		else if (prevDiff == 0 && diff != 0)
+		{
+			maxLength++;
+			prevDiff = diff;
+		}
+	}
+
+	return maxLength;
+}
+
+int traverse(int n, map<int, int>& dp) {
+	if (n == INT_MAX)
+		return traverse(n - 1, dp);
+
+	if (dp.count(n))
+		return dp[n];
+
+	if (n % 2 == 0)
+	{
+		int depth = traverse(n / 2, dp);
+		dp[n] = depth + 1;
+	}
+	else
+	{
+		int d1 = traverse(n + 1, dp);
+		int d2 = traverse(n - 1, dp);
+		dp[n] = min(d1, d2) + 1;
+	}
+
+	return dp[n];
+}
+
+int integerReplacement(int n) {
+	map<int, int> dp;
+	dp[1] = 0;
+	dp[2] = 1;
+
+	return traverse(n, dp);
+}
+
+vector<int> runningSum(vector<int>& nums) {
+	vector<int> sums;
+	sums.push_back(nums[0]);
+
+	for (int i = 1; i < nums.size(); ++i)
+		sums.push_back(nums[i] + sums[i - 1]);
+
+	return sums;
+}
+
 int main() {
 	vector<string> ans = readBinaryWatch(2);
 	// print_vector(ans);
+
+	cout << integerReplacement(8) << endl;
+	cout << INT_MAX << endl;
 	return 0;
 }
