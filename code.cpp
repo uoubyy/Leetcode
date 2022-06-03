@@ -469,11 +469,107 @@ vector<int> runningSum(vector<int>& nums) {
 	return sums;
 }
 
+string removeKdigits(string num, int k) {
+	if (num.length() <= k)
+		return "0";
+
+	stack<char> res;
+	res.push(num[0]);
+
+	int i = 1;
+	for (; i < num.length(); ++i)
+	{
+		while (k > 0 && !res.empty() && num[i] < res.top())
+		{
+			res.pop();
+			k--;
+		}
+		res.push(num[i]);
+
+		if (k <= 0)
+			break;
+	}
+
+	string number;
+	while (!res.empty())
+	{
+		number.push_back(res.top());
+		res.pop();
+	}
+
+	reverse(number.begin(), number.end());
+	if (i < num.length())
+		number += num.substr(i + 1);
+
+	number = number.substr(0, number.length() - k);
+	i = 0;
+	for (; i < number.length() - 1; ++i)
+	{
+		if (number[i] != '0')
+			break;
+	}
+
+	return number.substr(i);
+}
+
+int longestPalindrome(string s) {
+	map<char, int> nums;
+
+	for (auto c : s)
+	{ nums[c]++; }
+
+	int len = 0;
+
+	int extra = 0;
+	for (auto itor = nums.begin(); itor != nums.end(); itor++)
+	{
+		if (itor->second % 2 == 0)
+			len += itor->second;
+		else
+		{
+			len += itor->second - 1;
+			extra = 1;
+		}
+	}
+
+	return len + extra;
+}
+
+class NumMatrix {
+public:
+	NumMatrix(vector<vector<int>>& matrix) {
+		m = matrix.size();
+		n = matrix[0].size();
+		sumMat = vector<vector<int>>(m + 1, vector<int>(n + 1, 0));
+
+		for (int i = 0; i < m; ++i)
+		{
+			for (int j = 0; j < n; ++j)
+			{
+				sumMat[i + 1][j + 1] = sumMat[i][j + 1] + sumMat[i + 1][j] +
+									   matrix[i][j] - sumMat[i][j];
+			}
+		}
+	}
+
+	int sumRegion(int row1, int col1, int row2, int col2) {
+		return sumMat[row2 + 1][col2 + 1] - sumMat[row2 + 1][col1] -
+			   sumMat[row1][col2 + 1] + sumMat[row1][col1];
+	}
+
+private:
+	vector<vector<int>> sumMat;
+	int m;
+	int n;
+};
+
 int main() {
 	vector<string> ans = readBinaryWatch(2);
 	// print_vector(ans);
 
 	cout << integerReplacement(8) << endl;
 	cout << INT_MAX << endl;
+	cout << removeKdigits("1432219", 3) << endl;
+
 	return 0;
 }
