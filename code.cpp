@@ -563,6 +563,87 @@ private:
 	int n;
 };
 
+int minProductSum(vector<int>& nums1, vector<int>& nums2) {
+	sort(nums1.begin(), nums1.end(), greater<int>());
+	sort(nums2.begin(), nums2.end());
+
+	int sum = 0;
+	for (int i = 0; i < nums1.size(); ++i)
+		sum += nums1[i] * nums2[i];
+
+	return sum;
+}
+
+int minPartitions(string n) {
+	int cnt = 1;
+	for (int i = 0; i < n.length(); ++i)
+		cnt = max(cnt, n[i] - '0');
+
+	return cnt;
+}
+
+bool isVaild(int x0, int y0, int x1, int y1) {
+	if (x0 == x1 || y0 == y1)
+		return false;
+	if (abs(x0 - x1) == abs(y0 - y1))
+		return false;
+
+	return true;
+}
+
+void setQueen(int k,
+			  int N,
+			  vector<vector<int>>& operations,
+			  vector<vector<string>>& res) {
+	if (k == N)
+	{
+		if (operations.size() > 0)
+		{
+			vector<string> solution;
+			for (auto& op : operations)
+			{
+				string row(N, '.');
+				row[op[1]] = 'Q';
+				solution.push_back(row);
+			}
+			res.push_back(solution);
+		}
+	}
+
+	printf("start set queen %d\n", k);
+
+	for (int i = 0; i < N; ++i)	 // try to set the queen in each col
+	{
+		if (k == 0)
+			operations.clear();
+
+		bool valid = true;
+		for (auto& op : operations)
+		{
+			if (op[1] == i || (abs(op[1] - i) == abs(op[0] - k)))
+			{
+				valid = false;
+				break;
+			}
+		}
+
+		if (valid)
+		{
+			operations.push_back({k, i});
+			setQueen(k + 1, N, operations, res);
+			operations.pop_back();
+		}
+	}
+}
+
+vector<vector<string>> solveNQueens(int n) {
+	vector<vector<string>> ans;
+
+	vector<vector<int>> operations;
+	setQueen(0, n, operations, ans);
+	return ans;
+}
+
 int main() {
 	vector<string> ans = readBinaryWatch(2);
 	// print_vector(ans);
@@ -570,6 +651,8 @@ int main() {
 	cout << integerReplacement(8) << endl;
 	cout << INT_MAX << endl;
 	cout << removeKdigits("1432219", 3) << endl;
+
+	solveNQueens(5);
 
 	return 0;
 }
