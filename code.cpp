@@ -591,26 +591,12 @@ bool isVaild(int x0, int y0, int x1, int y1) {
 	return true;
 }
 
-void setQueen(int k,
-			  int N,
-			  vector<vector<int>>& operations,
-			  vector<vector<string>>& res) {
+void setQueen(int k, int N, vector<vector<int>>& operations, int& cnt) {
 	if (k == N)
 	{
 		if (operations.size() > 0)
-		{
-			vector<string> solution;
-			for (auto& op : operations)
-			{
-				string row(N, '.');
-				row[op[1]] = 'Q';
-				solution.push_back(row);
-			}
-			res.push_back(solution);
-		}
+		{ cnt++; }
 	}
-
-	printf("start set queen %d\n", k);
 
 	for (int i = 0; i < N; ++i)	 // try to set the queen in each col
 	{
@@ -630,18 +616,84 @@ void setQueen(int k,
 		if (valid)
 		{
 			operations.push_back({k, i});
-			setQueen(k + 1, N, operations, res);
+			setQueen(k + 1, N, operations, cnt);
 			operations.pop_back();
 		}
 	}
 }
 
-vector<vector<string>> solveNQueens(int n) {
-	vector<vector<string>> ans;
+void traverse(TreeNode* node, vector<int>& vals) {
+	if (node == nullptr)
+		return;
+
+	traverse(node->left, vals);
+	traverse(node->right, vals);
+	vals.push_back(node->val);
+}
+
+vector<int> inorderTraversal(TreeNode* root) {
+	vector<int> values;
+
+	traverse(root, values);
+	return values;
+}
+
+int totalNQueens(int n) {
+	int cnt = 0;
 
 	vector<vector<int>> operations;
-	setQueen(0, n, operations, ans);
-	return ans;
+	setQueen(0, n, operations, cnt);
+	return cnt;
+}
+
+vector<vector<int>> levelOrder(Node* root) {
+	vector<vector<int>> res;
+	queue<Node*> curLevel;
+	queue<Node*> nextLevel;
+	nextLevel.push(root);
+
+	while (true)
+	{
+		vector<int> values;
+		swap(curLevel, nextLevel);
+		while (!curLevel.empty())
+		{
+			Node* node = curLevel.front();
+
+			curLevel.pop();
+			if (node)
+			{
+				values.push_back(node->val);
+				for (auto child : node->children)
+				{
+					if (child)
+						nextLevel.push(child);
+				}
+			}
+		}
+
+		if (values.size() > 0)
+			res.push_back(values);
+		else
+			break;
+	}
+
+	return res;
+}
+
+void traverse(Node* node, vector<int>& res) {
+	if (node == nullptr)
+		return;
+	res.push_back(node->val);
+	for (auto& child : node->children)
+		traverse(child, res);
+}
+
+vector<int> preorder(Node* root) {
+	vector<int> res;
+	traverse(root, res);
+
+	return res;
 }
 
 int main() {
@@ -652,7 +704,7 @@ int main() {
 	cout << INT_MAX << endl;
 	cout << removeKdigits("1432219", 3) << endl;
 
-	solveNQueens(5);
+	totalNQueens(5);
 
 	return 0;
 }
