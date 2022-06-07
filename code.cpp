@@ -622,14 +622,14 @@ void setQueen(int k, int N, vector<vector<int>>& operations, int& cnt) {
 	}
 }
 
-void traverse(TreeNode* node, vector<int>& vals) {
-	if (node == nullptr)
-		return;
+// void traverse(TreeNode* node, vector<int>& vals) {
+// 	if (node == nullptr)
+// 		return;
 
-	traverse(node->left, vals);
-	traverse(node->right, vals);
-	vals.push_back(node->val);
-}
+// 	traverse(node->left, vals);
+// 	traverse(node->right, vals);
+// 	vals.push_back(node->val);
+// }
 
 vector<int> inorderTraversal(TreeNode* root) {
 	vector<int> values;
@@ -684,9 +684,11 @@ vector<vector<int>> levelOrder(Node* root) {
 void traverse(Node* node, vector<int>& res) {
 	if (node == nullptr)
 		return;
-	res.push_back(node->val);
+
 	for (auto& child : node->children)
 		traverse(child, res);
+
+	res.push_back(node->val);
 }
 
 vector<int> preorder(Node* root) {
@@ -694,6 +696,187 @@ vector<int> preorder(Node* root) {
 	traverse(root, res);
 
 	return res;
+}
+
+bool compare(TreeNode* node1, TreeNode* node2) {
+	if (node1 == nullptr && node2 != nullptr)
+		return false;
+	if (node1 != nullptr && node2 == nullptr)
+		return false;
+
+	return node1->val == node2->val && compare(node1->left, node2->left) &&
+		   compare(node1->right, node2->right);
+}
+
+bool isSameTree(TreeNode* node1, TreeNode* node2) {
+	if (node1 == node2)
+		return true;
+	if (node1 == nullptr && node2 != nullptr)
+		return false;
+	if (node1 != nullptr && node2 == nullptr)
+		return false;
+
+	return node1->val == node2->val && isSameTree(node1->left, node2->left) &&
+		   isSameTree(node1->right, node2->right);
+}
+
+bool isSubtree(TreeNode* root, TreeNode* subRoot) {
+	if (root == nullptr && subRoot != nullptr)
+		return false;
+
+	if (isSameTree(root, subRoot))
+		return true;
+
+	if (isSubtree(root->left, subRoot))
+		return true;
+
+	if (isSubtree(root->right, subRoot))
+		return true;
+
+	return false;
+}
+
+bool isUnivalTree(TreeNode* root) {
+	queue<TreeNode*> nodes;
+	nodes.push(root);
+	int target = root->val;
+
+	while (nodes.empty() == false)
+	{
+		TreeNode* node = nodes.front();
+		nodes.pop();
+
+		if (node->val != target)
+			return false;
+
+		if (node->left)
+			nodes.push(node->left);
+
+		if (node->right)
+			nodes.push(node->right);
+	}
+
+	return true;
+}
+
+vector<vector<int>> levelOrderBottom(TreeNode* root) {
+	queue<TreeNode*> curLevel;
+	curLevel.push(root);
+
+	vector<TreeNode*> nodes;
+
+	// while(!)
+}
+
+bool isSymmetric(TreeNode* root) {
+	queue<TreeNode*> nodes;
+
+	nodes.push(root);
+	stack<int> values;
+	values.push(root->val);
+
+	int i = 0;
+	int cnt = 1;
+	int validNum = 0;
+
+	while (nodes.empty() == false)
+	{
+		TreeNode* node = nodes.front();
+		nodes.pop();
+
+		nodes.push(node == nullptr ? nullptr : node->left);
+		nodes.push(node == nullptr ? nullptr : node->right);
+
+		if (node && (node->left || node->right))
+			validNum++;
+
+		if (i < cnt / 2)
+			values.push(node ? node->val : 101);
+		else
+		{
+			if (node == nullptr && values.top() != 101)
+				return false;
+
+			if (node && node->val != values.top())
+				return false;
+
+			values.pop();
+		}
+
+		i++;
+		if (i >= cnt)
+		{
+			i = 0;
+			cnt *= 2;
+
+			if (validNum == 0)
+				break;
+
+			validNum = 0;
+		}
+	}
+
+	return true;
+}
+
+void merge(vector<int>& nums1, int m, vector<int>& nums2, int n) {
+	int i = m - 1, j = n - 1, k = m + n - 1;
+	for (int k = m + n - 1; i >= 0 && j >= 0; k--)
+	{
+		nums1[k] = max(nums1[i], nums2[j]);
+		if (nums1[i] < nums2[j])
+			j--;
+		else
+			i--;
+	}
+
+	while (i >= 0)
+	{
+		nums1[k] = nums1[i];
+		i--;
+		k--;
+	}
+
+	while (j >= 0)
+	{
+		nums1[k] = nums2[j];
+		j--;
+		k--;
+	}
+}
+
+int minDepth(TreeNode* root) {
+	queue<TreeNode*> curLevel;
+	queue<TreeNode*> nextLevel;
+
+	int depth = 0;
+	if (root)
+		curLevel.push(root);
+
+	while (curLevel.empty() == false)
+	{
+		TreeNode* node = curLevel.front();
+		curLevel.pop();
+
+		if (node && node->left)
+			nextLevel.push(node->left);
+		if (node && node->right)
+			nextLevel.push(node->right);
+
+		if (node && node->left == nullptr && node->right == nullptr)
+		{
+			depth++;
+			break;
+		}
+
+		if (curLevel.empty())
+		{
+			depth++;
+			swap(curLevel, nextLevel);
+		}
+	}
+
+	return depth;
 }
 
 int main() {
