@@ -954,15 +954,15 @@ bool leafSimilar(TreeNode* root1, TreeNode* root2) {
 	{
 		TreeNode* node = nodes.front();
 		nodes.pop_front();
-		if(node)
+		if (node)
 		{
-			if(node->left == nullptr && node ->right == nullptr)
+			if (node->left == nullptr && node->right == nullptr)
 				leaves.push_back(node->val);
 			else
-			{ 
-				if(node->right)
+			{
+				if (node->right)
 					nodes.push_front(node->right);
-				if(node->left)
+				if (node->left)
 					nodes.push_front(node->left);
 			}
 		}
@@ -975,25 +975,53 @@ bool leafSimilar(TreeNode* root1, TreeNode* root2) {
 	{
 		TreeNode* node = nodes.front();
 		nodes.pop_front();
-		if(node)
+		if (node)
 		{
-			if(node->left == nullptr && node ->right == nullptr)
+			if (node->left == nullptr && node->right == nullptr)
 			{
-				if(node->val != leaves[idx])
+				if (node->val != leaves[idx])
 					return false;
 				idx++;
 			}
 			else
-			{ 
-				if(node->right)
+			{
+				if (node->right)
 					nodes.push_front(node->right);
-				if(node->left)
+				if (node->left)
 					nodes.push_front(node->left);
 			}
 		}
 	}
 
 	return idx >= leaves.size();
+}
+
+int minOperations(vector<int>& nums, int x) {
+	int total = accumulate(nums.begin(), nums.end(), 0);
+
+	if (total < x)
+		return -1;
+	if (total == x)
+		return nums.size();
+
+	int left = 0;
+	int current = 0;
+	int step = -1;
+
+	for (int right = 0; right < nums.size(); ++right)
+	{
+		current += nums[right];
+		while (current > total - x && left <= right)
+		{
+			current -= nums[left];
+			left++;
+		}
+
+		if (current == total - x)
+			step = max(step, right - left + 1);
+	}
+
+	return step != -1 ? nums.size() - step : -1;
 }
 
 int main() {
