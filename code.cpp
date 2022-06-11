@@ -759,15 +759,6 @@ bool isUnivalTree(TreeNode* root) {
 	return true;
 }
 
-vector<vector<int>> levelOrderBottom(TreeNode* root) {
-	queue<TreeNode*> curLevel;
-	curLevel.push(root);
-
-	vector<TreeNode*> nodes;
-
-	// while(!)
-}
-
 bool isSymmetric(TreeNode* root) {
 	queue<TreeNode*> nodes;
 
@@ -879,6 +870,132 @@ int minDepth(TreeNode* root) {
 	return depth;
 }
 
+int lengthOfLongestSubstring(string s) {
+	int begin = 0;
+
+	vector<int> chars(26, -1);
+
+	int maxI = 0;
+	int maxL = 0;
+
+	int i = 0;
+	for (; i < s.length(); ++i)
+	{
+		int prev = chars[s[i] - 'a'];
+		if (prev >= 0 && prev >= begin)
+		{
+			// appear a same character
+			int cnt = i - begin;
+			if (maxL < cnt)
+			{
+				maxL = cnt;
+				maxI = begin;
+			}
+
+			begin = prev + 1;
+		}
+
+		chars[s[i] - 'a'] = i;
+	}
+	maxL = max(maxL, i - begin);
+
+	return maxL;
+}
+
+vector<int> twoSum(vector<int>& numbers, int target) {
+	vector<int> nums(2001, -1);
+
+	vector<int> res;
+	for (int i = 0; i < numbers.size(); ++i)
+	{
+		int tag = target - numbers[i] + 1000;
+		if (nums[tag] != -1)
+		{
+			res.push_back(nums[tag] + 1);
+			res.push_back(i + 1);
+			break;
+		}
+		else
+		{ nums[numbers[i] + 1000 + 1] = i; }
+	}
+
+	return res;
+}
+
+void traverse(TreeNode* node, vector<vector<int>>& res, int depth) {
+	if (node == nullptr)
+		return;
+
+	if (res.size() <= depth)
+		res.push_back(vector<int>());
+
+	traverse(node->left, res, depth + 1);
+	traverse(node->right, res, depth + 1);
+
+	res[depth].push_back(node->val);
+}
+
+vector<vector<int>> levelOrderBottom(TreeNode* root) {
+	vector<vector<int>> res;
+
+	res.push_back(vector<int>());
+	traverse(root, res, 0);
+
+	reverse(res.begin(), res.end());
+	return res;
+}
+
+bool leafSimilar(TreeNode* root1, TreeNode* root2) {
+	vector<int> leaves;
+	deque<TreeNode*> nodes;
+
+	nodes.push_back(root1);
+	while (!nodes.empty())
+	{
+		TreeNode* node = nodes.front();
+		nodes.pop_front();
+		if(node)
+		{
+			if(node->left == nullptr && node ->right == nullptr)
+				leaves.push_back(node->val);
+			else
+			{ 
+				if(node->right)
+					nodes.push_front(node->right);
+				if(node->left)
+					nodes.push_front(node->left);
+			}
+		}
+	}
+
+	int idx = 0;
+	nodes.clear();
+	nodes.push_back(root2);
+	while (!nodes.empty())
+	{
+		TreeNode* node = nodes.front();
+		nodes.pop_front();
+		if(node)
+		{
+			if(node->left == nullptr && node ->right == nullptr)
+			{
+				if(node->val != leaves[idx])
+					return false;
+				idx++;
+			}
+			else
+			{ 
+				if(node->right)
+					nodes.push_front(node->right);
+				if(node->left)
+					nodes.push_front(node->left);
+			}
+		}
+	}
+
+	return idx >= leaves.size();
+}
+
 int main() {
 	vector<string> ans = readBinaryWatch(2);
 	// print_vector(ans);
@@ -888,6 +1005,15 @@ int main() {
 	cout << removeKdigits("1432219", 3) << endl;
 
 	totalNQueens(5);
+
+	TreeNode* n0 = new TreeNode(15);
+	TreeNode* n1 = new TreeNode(7);
+	TreeNode* n2 = new TreeNode(20, n0, n1);
+
+	TreeNode* n3 = new TreeNode(9);
+	TreeNode* n4 = new TreeNode(3, n2, n3);
+
+	leafSimilar(n4, nullptr);
 
 	return 0;
 }
