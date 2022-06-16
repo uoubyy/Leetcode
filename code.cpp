@@ -1024,6 +1024,135 @@ int minOperations(vector<int>& nums, int x) {
 	return step != -1 ? nums.size() - step : -1;
 }
 
+int minSubArrayLen(int target, vector<int>& nums) {
+	int left = 0, right = 0;
+	int current = 0;
+	int len = nums.size();
+
+	if (accumulate(nums.begin(), nums.end(), 0) == target)
+		return len;
+
+	for (; right < nums.size(); ++right)
+	{
+		current += nums[right];
+		while (current > target && left <= right)
+		{
+			current -= nums[left];
+			++left;
+		}
+
+		if (current < target && left > 0)
+		{
+			--left;
+			current += nums[left];
+		}
+
+		len = min(len, right - left + 1);
+	}
+
+	return len != nums.size() ? len : 0;
+}
+
+TreeNode* trimBST(TreeNode* root, int low, int high) {
+	if (root == nullptr)
+		return nullptr;
+
+	TreeNode* cur = (root->val >= low && root->val <= high) ? root : nullptr;
+	TreeNode* lchild = trimBST(root->left, low, high);
+	TreeNode* rchild = trimBST(root->right, low, high);
+
+	if (cur)
+	{
+		cur->left = lchild;
+		cur->right = rchild;
+	}
+	else
+	{
+		if (lchild && rchild)
+		{
+			cur = lchild;
+			cur->right = rchild;
+		}
+		else
+		{ cur = lchild ? lchild : (rchild ? rchild : nullptr); }
+	}
+
+	return cur;
+}
+
+TreeNode* removeLeafNodes(TreeNode* root, int target) {
+	if (root == nullptr)
+		return nullptr;
+
+	TreeNode* lchild = removeLeafNodes(root->left, target);
+	TreeNode* rchild = removeLeafNodes(root->right, target);
+
+	root->left = lchild;
+	root->right = rchild;
+
+	if (lchild == nullptr && rchild == nullptr && root->val == target)
+		root = nullptr;
+
+	return root;
+}
+
+// prefix tree
+class Trie {
+public:
+	Trie() : root(new TrieNode) {}
+
+	~Trie() { delete root; }
+
+	void insert(string word) {
+		TrieNode* p = root;
+		for (const char c : word)
+		{
+			if (!p->children.count(c))
+				p->children[c] = new TrieNode();
+			p = p->children[c];
+		}
+		p->isWord = true;
+	}
+
+	bool search(string word) {
+		const TrieNode* p = find(word);
+		return p && p->isWord;
+	}
+
+	bool startsWith(string prefix) { return find(prefix) != nullptr; }
+
+private:
+	struct TrieNode {
+		unordered_map<char, TrieNode*> children;
+		bool isWord;
+
+		TrieNode() : isWord(false) {}
+
+		~TrieNode() {
+			for (auto& child : children)
+			{
+				if (child.second)
+					delete child.second;
+			}
+		}
+	};
+
+	const TrieNode* find(const string& prefix) const {
+		const TrieNode* p = root;
+		for (const char c : prefix)
+		{
+			if (!p->children.count(c))
+				return nullptr;
+
+			p = p->children.at(c);
+		}
+
+		return p;
+	}
+
+	TrieNode* root;
+};
+
 int main() {
 	vector<string> ans = readBinaryWatch(2);
 	// print_vector(ans);
@@ -1031,17 +1160,6 @@ int main() {
 	cout << integerReplacement(8) << endl;
 	cout << INT_MAX << endl;
 	cout << removeKdigits("1432219", 3) << endl;
-
-	totalNQueens(5);
-
-	TreeNode* n0 = new TreeNode(15);
-	TreeNode* n1 = new TreeNode(7);
-	TreeNode* n2 = new TreeNode(20, n0, n1);
-
-	TreeNode* n3 = new TreeNode(9);
-	TreeNode* n4 = new TreeNode(3, n2, n3);
-
-	leafSimilar(n4, nullptr);
 
 	return 0;
 }
