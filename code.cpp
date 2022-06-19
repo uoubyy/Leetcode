@@ -1153,6 +1153,158 @@ private:
 	TrieNode* root;
 };
 
+int traverse(vector<int>& nums, int left, int right) {
+	if (left + 1 >= right)
+		return min(nums[left], nums[right]);
+
+	if (nums[left] < nums[right])
+		return nums[left];
+
+	int mid = left + (right - left) / 2;
+	return min(traverse(nums, left, mid), traverse(nums, mid + 1, right));
+}
+
+int findMin(vector<int>& nums) {
+	return traverse(nums, 0, nums.size() - 1);
+}
+
+bool hasPathSum(TreeNode* root, int targetSum) {
+	if (root == nullptr)
+		return false;
+
+	if (root->left == nullptr && root->right == nullptr)
+		return targetSum == root->val;
+
+	bool left =
+		root->left ? hasPathSum(root->left, targetSum - root->val) : false;
+	bool right =
+		root->right ? hasPathSum(root->right, targetSum - root->val) : false;
+
+	return left || right;
+}
+
+int numOfPaths(TreeNode* node, int target) {
+	if (node == nullptr)
+		return 0;
+	target -= node->val;
+
+	return (target == 0 ? 1 : 0) + numOfPaths(node->left, target) +
+		   numOfPaths(node->right, target);
+}
+
+int pathSum(TreeNode* root, int targetSum) {
+	if (root == nullptr)
+		return 0;
+	return numOfPaths(root, targetSum) + pathSum(root->left, targetSum) +
+		   pathSum(root->right, targetSum);
+}
+
+int subarraySum(vector<int>& nums, int k) {
+	map<int, int> dp;
+
+	int curSum = 0;
+	int cnt = 0;
+	for (auto num : nums)
+	{
+		curSum += num;
+		if (dp.count(curSum - k))
+			cnt += dp[curSum - k];
+
+		if (curSum == k)
+			cnt += 1;
+
+		dp[curSum] = dp.count(curSum) ? dp[curSum] + 1 : 1;
+	}
+
+	return cnt;
+}
+
+bool checkSubarraySum(vector<int> nums, int k) {
+	map<int, vector<int>> dp;
+
+	int curSum = 0;
+
+	for (int i = 0; i < nums.size(); ++i)
+	{
+		curSum += nums[i];
+		if (curSum % k == 0 && i >= 1)
+			return true;
+
+		if (i >= 1 && nums[i] == 0 && nums[i - 1] == 0)
+			return true;
+
+		int rat = 1;
+		while (k * rat <= curSum)
+		{
+			if (dp.count(curSum - k * rat))
+			{
+				vector<int> idx = dp[curSum - k * rat];
+				for (auto id : idx)
+				{
+					if (i - id >= 1)
+						return true;
+				}
+			}
+			++rat;
+		}
+
+		if (dp.count(curSum))
+			dp[curSum].push_back(i);
+		else
+			dp[curSum] = {i};
+	}
+
+	return false;
+}
+
+int numSubarrayProductLessThanK(vector<int>& nums, int k) {
+	int cnt = 0;
+
+	int left = 0, right = 0;
+	int cur = 1;
+
+	for (; right < nums.size() && left <= right;)
+	{
+		cur *= nums[right];
+
+		while (cur >= k && left <= right)
+		{
+			cur /= nums[left];
+			++left;
+		}
+
+		if (cur < k && right >= left)
+			cnt += right - left + 1;
+
+		right++;
+	}
+
+	return cnt;
+}
+
+int subarraysDivByK(vector<int>& nums, int k) {
+	unordered_map<int, int> dp;
+	int cnt = 0;
+	int sum = 0;
+
+	for (auto num : nums)
+	{
+		sum += num;
+		sum = sum % k;
+		sum = sum < 0 ? sum + k : sum;
+
+		if (dp.count(sum))
+			cnt += dp[sum];
+
+		if (sum == 0)
+			++cnt;
+
+		dp[sum] = dp.count(sum) ? dp[sum] + 1 : 1;
+	}
+
+	return cnt;
+}
+
 int main() {
 	vector<string> ans = readBinaryWatch(2);
 	// print_vector(ans);
@@ -1160,6 +1312,8 @@ int main() {
 	cout << integerReplacement(8) << endl;
 	cout << INT_MAX << endl;
 	cout << removeKdigits("1432219", 3) << endl;
+
+	checkSubarraySum({1, 2, 12}, 6);
 
 	return 0;
 }
