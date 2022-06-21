@@ -1305,15 +1305,174 @@ int subarraysDivByK(vector<int>& nums, int k) {
 	return cnt;
 }
 
+int rob(vector<int>& nums) {
+	int n = nums.size();
+	vector<int> dp(n + 1, 0);
+	dp[1] = nums[0];
+
+	for (int i = 2; i <= n; ++i)
+	{ dp[i] = max(dp[i - 1], dp[i - 2] + nums[i - 1]); }
+
+	return dp[n];
+}
+
+int traverse(unordered_map<int, int>& memo, vector<int>& cost, int level) {
+	if (level <= 1)
+		return 0;
+
+	if (memo.count(level))
+		return memo[level];
+
+	memo[level] = min(traverse(memo, cost, level - 1) + cost[level - 1],
+					  traverse(memo, cost, level - 2) + cost[level - 2]);
+	return memo[level];
+}
+
+int minCostClimbingStairs(vector<int>& cost) {
+	unordered_map<int, int> memo;
+	return traverse(memo, cost, cost.size());
+}
+
+int minCost(vector<vector<int>>& costs) {
+	int R = costs[0][0], G = costs[0][1], B = costs[0][2];
+
+	for (int i = 1; i < costs.size(); ++i)
+	{
+		int r = costs[i][0] + min(G, B);
+		int g = costs[i][1] + min(R, B);
+		int b = costs[i][2] + min(R, G);
+		R = r;
+		G = g;
+		B = b;
+	}
+
+	return min(R, min(G, B));
+}
+
+int tribonacci(int n) {
+	int T[3] = {0, 1, 1};
+	if (n <= 2)
+		return T[n];
+
+	for (int i = 3; i <= n; ++i)
+	{
+		int tmp = T[0] + T[1] + T[2];
+		T[0] = T[1];
+		T[1] = T[2];
+		T[2] = tmp;
+	}
+	return T[2];
+}
+
+int getMax(vector<int>& nums, unordered_map<int, int>& dp, int r) {
+	if (r < 0)
+		return 0;
+
+	int cnt = 0;
+
+	int cur = nums[r];
+	while (r >= 0 && nums[r] == cur)
+	{
+		--r;
+		++cnt;
+	}
+
+	// get next in-adjacent node
+	int next = r;
+	while (next >= 0 && nums[next] == cur - 1)
+	{ --next; }
+
+	int selected = cnt * cur + getMax(nums, dp, next);
+	if (next == r)	// always in-adjacent
+		dp[r + cnt] = selected;
+	else
+		dp[r + cnt] = max(selected, getMax(nums, dp, r));
+
+	return dp[r + cnt];
+}
+
+int deleteAndEarn(vector<int> nums) {
+	unordered_map<int, int> points;
+	vector<int> uniqueNums;
+	for (auto num : nums)
+	{
+		if (!points.count(num))
+			uniqueNums.push_back(num);
+		points[num] += num;
+	}
+
+	sort(uniqueNums.begin(), uniqueNums.end());
+
+	int oneBack = points[uniqueNums[0]];
+	int twoBack = 0;
+
+	for (int i = 1; i < uniqueNums.size(); ++i)
+	{
+		int tmp = oneBack;
+		if (uniqueNums[i] == uniqueNums[i - 1] + 1)
+		{ oneBack = max(oneBack, twoBack + points[uniqueNums[i]]); }
+		else
+		{ oneBack += points[uniqueNums[i]]; }
+		twoBack = tmp;
+	}
+
+	return oneBack;
+}
+
+int dp(vector<int>& multipliers,
+	   vector<int>& nums,
+	   vector<vector<int>>& memo,
+	   int left,
+	   int right,
+	   int i) {
+	int m = multipliers.size();
+
+	if (i == m)
+		return 0;
+
+	int mult = multipliers[i];
+
+	if (memo[i][left] == 0)
+	{
+		memo[i][left] = max(mult * nums[left] + dp(multipliers, nums, memo,
+												   left + 1, right, i + 1),
+							mult * nums[right] + dp(multipliers, nums, memo,
+													left, right - 1, i + 1));
+	}
+
+	return memo[i][left];
+}
+
+int maximumScore(vector<int>& nums, vector<int>& multipliers) {
+	int m = multipliers.size();
+	vector<vector<int>> memo(m + 1, vector<int>(m + 1, 0));
+
+	for (int i = m - 1; i >= 0; --i)
+	{
+		for (int left = i; left >= 0; --left)
+		{
+			int right = nums.size() - 1 - (i - left);
+			memo[i][left] =
+				max(multipliers[i] * nums[left] + memo[i + 1][left + 1],
+					multipliers[i] * nums[right] + memo[i + 1][left]);
+		}
+	}
+
+	return memo[0][0];
+	// Time Limit Exceeded: Top-down
+	// return dp(multipliers, nums, memo, 0, nums.size() - 1, 0);
+}
+
 int main() {
-	vector<string> ans = readBinaryWatch(2);
-	// print_vector(ans);
+	readBinaryWatch(2);
 
 	cout << integerReplacement(8) << endl;
 	cout << INT_MAX << endl;
 	cout << removeKdigits("1432219", 3) << endl;
 
 	checkSubarraySum({1, 2, 12}, 6);
+
+	int ans = deleteAndEarn({2, 2, 3, 3, 3, 4});
 
 	return 0;
 }
