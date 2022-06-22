@@ -1463,6 +1463,63 @@ int maximumScore(vector<int>& nums, vector<int>& multipliers) {
 	// return dp(multipliers, nums, memo, 0, nums.size() - 1, 0);
 }
 
+int longestCommonSubsequence(string text1, string text2) {
+	int m = text1.length(), n = text2.length();
+	vector<vector<int>> memo(m, vector<int>(n, 0));
+	memo[0][0] = text1[0] == text2[0] ? 1 : 0;
+
+	int prev = memo[0][0];
+	for (int x = 1; x < m; ++x)
+	{
+		if (text1[x] == text2[0])
+			prev = 1;
+		memo[x][0] = prev;
+	}
+	prev = memo[0][0];
+	for (int y = 1; y < n; ++y)
+	{
+		if (text2[y] == text1[0])
+			prev = 1;
+		memo[0][y] = prev;
+	}
+
+	for (int i = 1; i < m; ++i)
+	{
+		for (int j = 1; j < n; ++j)
+		{
+			if (text1[i] == text2[j])
+				memo[i][j] = memo[i - 1][j - 1] + 1;
+			else
+				memo[i][j] = max(memo[i][j - 1], memo[i - 1][j]);
+		}
+	}
+
+	return memo[m - 1][n - 1];
+}
+
+int maximalSquare(vector<vector<char>>& matrix) {
+	int m = matrix.size(), n = matrix[0].size();
+
+	vector<vector<int>> memo(m + 1, vector<int>(n + 1, 0));
+	int cnt = 0;
+	for (int i = 1; i <= m; ++i)
+	{
+		for (int j = 1; j <= n; ++j)
+		{
+			if (matrix[i - 1][j - 1] == '1')
+				memo[i][j] = min(memo[i - 1][j - 1],
+								 min(memo[i][j - 1], memo[i - 1][j])) +
+							 1;
+			else
+				memo[i][j] = 0;
+
+			cnt = max(cnt, memo[i][j]);
+		}
+	}
+
+	return cnt * cnt;
+}
+
 int main() {
 	readBinaryWatch(2);
 
@@ -1474,5 +1531,7 @@ int main() {
 
 	int ans = deleteAndEarn({2, 2, 3, 3, 3, 4});
 
+	ans = longestCommonSubsequence("hofubmnylkra", "pqhgxgdofcvmr");
+	cout << ans << endl;
 	return 0;
 }
