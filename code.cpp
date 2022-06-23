@@ -1520,18 +1520,106 @@ int maximalSquare(vector<vector<char>>& matrix) {
 	return cnt * cnt;
 }
 
+class PriorityQueue {
+public:
+	PriorityQueue(int _max) : maxSize(_max), size(0) {}
+
+private:
+	vector<int> nums;
+	int maxSize;
+	int size;
+
+	int GetParent(int id) { return (id - 1) / 2; }
+
+	void BuildUp() {
+		int id = size - 1;
+
+		while (id > 0)
+		{
+			int parent = (id - 1) / 2;
+			int brother = (id % 2 == 0) ? id - 1 : id + 1;
+			brother = brother >= size ? size - 1 : brother;
+
+			if (nums[id] <= nums[brother] && nums[id] < nums[parent])
+				swap(nums[id], nums[parent]);
+			else if (nums[brother] <= nums[id] && nums[brother] < nums[parent])
+				swap(nums[brother], nums[parent]);
+			else
+				break;
+
+			id = parent;
+		}
+	}
+
+	void BuildDown() {
+		int id = 0;
+		while (id < size)
+		{
+			int left = id * 2 + 1;
+			left = min(left, size - 1);
+			int right = left + 1;
+			right = min(right, size - 1);
+
+			if (nums[id] > nums[left] && nums[right] >= nums[left])
+			{
+				swap(nums[id], nums[left]);
+				id = left;
+			}
+			else if (nums[id] > nums[right] && nums[left] >= nums[right])
+			{
+				swap(nums[id], nums[right]);
+				id = right;
+			}
+			else
+				break;
+		}
+	}
+
+public:
+	void Push(int val) {
+		if (maxSize <= 0 || size < maxSize)
+		{
+			++size;
+			nums.push_back(val);
+
+			BuildUp();
+		}
+		else if (maxSize > 0 && size == maxSize)
+		{
+			if (val > nums[0])
+			{
+				nums[0] = val;
+				BuildDown();
+			}
+		}
+
+		Display();
+	}
+
+	int Get() {
+		// assert(size > 0);
+		swap(nums[0], nums[size - 1]);
+		--size;
+
+		int val = nums[size];
+		nums.pop_back();
+		return val;
+	}
+
+	void Display() {
+		for (auto num : nums)
+			cout << num << " ";
+		cout << endl;
+	}
+};
+
 int main() {
-	readBinaryWatch(2);
+	PriorityQueue mQueue(2);
+	vector<int> nums{3, 2, 1, 5, 6, 4};
 
-	cout << integerReplacement(8) << endl;
-	cout << INT_MAX << endl;
-	cout << removeKdigits("1432219", 3) << endl;
+	for (auto num : nums)
+	{ mQueue.Push(num); }
 
-	checkSubarraySum({1, 2, 12}, 6);
-
-	int ans = deleteAndEarn({2, 2, 3, 3, 3, 4});
-
-	ans = longestCommonSubsequence("hofubmnylkra", "pqhgxgdofcvmr");
-	cout << ans << endl;
+	cout << mQueue.Get();
 	return 0;
 }
