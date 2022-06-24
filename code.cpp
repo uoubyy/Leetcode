@@ -1613,6 +1613,110 @@ public:
 	}
 };
 
+int dp(int i,
+	   int day,
+	   int d,
+	   vector<vector<int>>& memo,
+	   vector<int>& hardestJobRemaining,
+	   vector<int>& jobDifficulty) {
+	if (day == d)
+		return hardestJobRemaining[i];
+
+	int n = jobDifficulty.size();
+
+	if (memo[i][day] == -1)
+	{
+		int best = INT_MAX;
+		int hardest = 0;
+
+		for (int j = i; j < n - (d - day); ++j)
+		{
+			hardest = max(hardest, jobDifficulty[j]);
+			best = min(best, hardest + dp(j + 1, day + 1, d, memo,
+										  hardestJobRemaining, jobDifficulty));
+		}
+		memo[i][day] = best;
+	}
+
+	return memo[i][day];
+}
+
+int minDifficulty(vector<int>& jobDifficulty, int d) {
+	int n = jobDifficulty.size();
+	if (n < d)
+		return -1;
+
+	if (n == d)
+		return accumulate(jobDifficulty.begin(), jobDifficulty.end(), 0);
+
+	vector<int> hardestJobRemaining(n, 0);
+	int hardest = 0;
+	for (int i = n - 1; i >= 0; --i)
+	{
+		hardest = max(hardest, jobDifficulty[i]);
+		hardestJobRemaining[i] = hardest;
+	}
+
+	vector<vector<int>> memo(n, vector<int>(d + 1, -1));
+
+	return dp(0, 1, d, memo, hardestJobRemaining, jobDifficulty);
+}
+
+int dp(int amount, vector<int>& coins, unordered_map<int, int>& memo) {
+	if (amount < 0)
+		return -1;
+
+	if (amount == 0)
+		return 0;
+
+	if (!memo.count(amount))
+	{
+		int best = amount + 1;
+		for (auto coin : coins)
+		{
+			if (coin > amount)
+				break;
+
+			int next = dp(amount - coin, coins, memo);
+			if (next != -1)
+				best = min(best, 1 + dp(amount - coin, coins, memo));
+		}
+
+		if (best == amount + 1)
+			memo[amount] = -1;
+		else
+			memo[amount] = best;
+	}
+
+	return memo[amount];
+}
+
+int coinChange(vector<int>& coins, int amount) {
+	unordered_map<int, int> memo;
+	sort(coins.begin(), coins.end());
+	for (auto coin : coins)
+		memo[coin] = 1;
+	memo[0] = 0;
+
+	for (int i = 1; i <= amount; ++i)
+	{
+		int best = i + 1;
+		for (auto coin : coins)
+		{
+			if (coin > i)
+				break;
+
+			int prev = memo[i - coin];
+			if (prev >= 0)
+				best = min(best, 1 + prev);
+		}
+
+		memo[i] = best == i + 1 ? -1 : best;
+	}
+
+	return memo[amount];
+}
+
 int main() {
 	PriorityQueue mQueue(2);
 	vector<int> nums{3, 2, 1, 5, 6, 4};
@@ -1621,5 +1725,7 @@ int main() {
 	{ mQueue.Push(num); }
 
 	cout << mQueue.Get();
+
+	cout << coinChange({1, 2, 5}, 11);
 	return 0;
 }
