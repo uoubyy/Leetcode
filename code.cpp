@@ -1329,8 +1329,21 @@ int traverse(unordered_map<int, int>& memo, vector<int>& cost, int level) {
 }
 
 int minCostClimbingStairs(vector<int>& cost) {
-	unordered_map<int, int> memo;
-	return traverse(memo, cost, cost.size());
+	// unordered_map<int, int> memo;
+	// return traverse(memo, cost, cost.size());
+
+	int oneback = 0;
+	int twoback = 0;
+	int cur = 0;
+
+	for (int i = 2; i < cost.size(); ++i)
+	{
+		cur = min(oneback + cost[i - 1], twoback + cost[i - 2]);
+		twoback = oneback;
+		oneback = cur;
+	}
+
+	return cur;
 }
 
 int minCost(vector<vector<int>>& costs) {
@@ -1717,6 +1730,91 @@ int coinChange(vector<int>& coins, int amount) {
 	return memo[amount];
 }
 
+bool wordBreak(string s, vector<string> wordDict) {
+	int n = s.length();
+	vector<bool> memo(n + 1, false);
+	memo[0] = true;
+
+	for (int i = 1; i <= n; ++i)
+	{
+		for (auto word : wordDict)
+		{
+			int m = word.length();
+			if (m > i)
+				continue;
+
+			string curr = s.substr(i - m, m);
+			memo[i] = (curr == word) && memo[i - m];
+			if (memo[i])
+				break;
+		}
+	}
+
+	return memo[n];
+}
+
+int lengthOfLIS(vector<int>& nums) {
+	int n = nums.size();
+	vector<int> memo(n, 1);
+
+	int best = 1;
+
+	for (int i = 1; i < n; ++i)
+	{
+		for (int j = i - 1; j >= 0; --j)
+		{
+			if (nums[i] > nums[j])
+				memo[i] = max(memo[i], memo[j] + 1);
+		}
+
+		best = max(best, memo[i]);
+	}
+
+	return best;
+}
+
+int maxProfit(int k, vector<int>& prices) {
+	int n = prices.size();
+	vector<vector<vector<int>>> memo(
+		n + 1, vector<vector<int>>(k + 1, vector<int>(2, 0)));
+
+	for (int i = n - 1; i >= 0; --i)
+	{
+		for (int kRemainning = 1; kRemainning <= k; ++kRemainning)
+		{
+			for (int holding = 0; holding < 2; ++holding)
+			{
+				int doNothing = memo[i + 1][kRemainning][holding];
+				int doSomethinng = 0;
+				if (holding == 1)  // sell stock
+					doSomethinng = prices[i] + memo[i + 1][kRemainning - 1][0];
+				else
+					doSomethinng = -prices[i] + memo[i + 1][kRemainning][1];
+
+				memo[i][kRemainning][holding] = max(doSomethinng, doNothing);
+			}
+		}
+	}
+
+	return memo[0][k][0];
+}
+
+int maxProfitWithCD(vector<int>& prices) {
+	int n = prices.size();
+	vector<vector<int>> memo(n + 1, vector<int>(2, 0));
+	// 0 means not holding, 1 means holding
+	memo[1][0] = 0;
+	memo[1][1] = -prices[0];
+
+	for (int i = 2; i <= n; ++i)
+	{
+		memo[i][0] = max(memo[i - 1][1] + prices[i - 1], memo[i - 1][0]);
+		memo[i][1] = max(memo[i - 1][1], memo[i - 2][0] - prices[i - 1]);
+	}
+
+	return memo[n][0];
+}
+
 int main() {
 	PriorityQueue mQueue(2);
 	vector<int> nums{3, 2, 1, 5, 6, 4};
@@ -1726,6 +1824,7 @@ int main() {
 
 	cout << mQueue.Get();
 
-	cout << coinChange({1, 2, 5}, 11);
+	cout << (wordBreak("applepenapple", {"apple", "pen"}) ? "true" : "false")
+		 << endl;
 	return 0;
 }
