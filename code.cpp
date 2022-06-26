@@ -1346,6 +1346,31 @@ int minCostClimbingStairs(vector<int>& cost) {
 	return cur;
 }
 
+int numWays(int n, int k) {
+	// vector<vector<int>> memo(n + 1, vector<int>(2, 0));
+	// memo[1][0] = k;
+	// memo[1][1] = 0;
+
+	// for (int i = 2; i <= n; ++i)
+	// {
+	// 	memo[i][0] = memo[i - 1][0] * (k - 1) + memo[i - 1][1] * (k - 1);
+	// 	memo[i][1] = memo[i - 1][0];
+	// }
+
+	// return memo[n][0] + memo[n][1];
+
+	int oneback = k;
+	int twoback = 0;
+	for (int i = 2; i <= n; ++i)
+	{
+		int tmp = oneback;
+		oneback = (oneback + twoback) * (k - 1);
+		twoback = tmp;
+	}
+
+	return oneback + twoback;
+}
+
 int minCost(vector<vector<int>>& costs) {
 	int R = costs[0][0], G = costs[0][1], B = costs[0][2];
 
@@ -1815,16 +1840,89 @@ int maxProfitWithCD(vector<int>& prices) {
 	return memo[n][0];
 }
 
+int minCostII(vector<vector<int>> costs) {
+	int n = costs.size();
+	int k = costs[0].size();
+	vector<int> memo(k, 0);
+	for (int i = 0; i < k; ++i)
+		memo[i] = costs[0][i];
+
+	vector<int> temp(k, 0);
+	for (int i = 1; i < n; ++i)
+	{
+		for (int j = 0; j < k; ++j)
+		{
+			int best = INT_MAX;
+			for (int m = 0; m < k; ++m)
+			{
+				if (m == j)
+					continue;
+				best = min(best, memo[m]);
+			}
+			temp[j] = best + costs[i][j];
+		}
+		swap(memo, temp);
+		temp.clear();
+	}
+
+	int best = INT_MAX;
+	for (int i = 0; i < k; ++i)
+		best = min(best, memo[i]);
+
+	return best;
+}
+
+int coinChangeII(int amount, vector<int>& coins) {
+	vector<int> memo(amount + 1, 0);
+	memo[0] = 1;
+
+	for (auto coin : coins)
+	{
+		for (int x = coin; x <= amount; ++x)
+		{ memo[x] += memo[x - coin]; }
+	}
+
+	return memo[amount];
+}
+
+int numDecodings(string s) {
+	int n = s.length();
+	vector<vector<int>> memo(n + 1, vector<int>(2, 0));
+
+	if (s[0] == '0')
+		return 0;
+
+	memo[0][0] = 1;
+	memo[1][0] = 1;
+	memo[1][1] = 0;
+
+	for (int i = 2; i <= n; ++i)
+	{
+		int oneback = (s[i - 1] - '0');
+		int twoback = (s[i - 2] - '0') * 10 + oneback;
+
+		if (oneback > 0 && oneback < 10)
+			memo[i][0] = memo[i - 1][0] + memo[i - 1][1];
+
+		if (twoback >= 10 && twoback <= 26)
+			memo[i][1] = memo[i - 2][0] + memo[i - 2][1];
+
+		if (memo[i][0] == 0 && memo[i][1] == 0)
+			return 0;
+	}
+
+	return memo[n][0] + memo[n][1];
+}
+
 int main() {
 	PriorityQueue mQueue(2);
 	vector<int> nums{3, 2, 1, 5, 6, 4};
 
-	for (auto num : nums)
-	{ mQueue.Push(num); }
-
-	cout << mQueue.Get();
-
 	cout << (wordBreak("applepenapple", {"apple", "pen"}) ? "true" : "false")
 		 << endl;
+
+	cout << minCostII({{1, 5, 3}, {2, 9, 4}}) << endl;
+
+	cout << numDecodings("12") << endl;
 	return 0;
 }
