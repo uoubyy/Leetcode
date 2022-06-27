@@ -1914,6 +1914,224 @@ int numDecodings(string s) {
 	return memo[n][0] + memo[n][1];
 }
 
+int maxProfit(vector<int>& prices) {
+	int low = prices[0];
+	int high = prices[0];
+	int best = 0;
+
+	for (int i = 1; i < prices.size(); ++i)
+	{
+		if (prices[i] < low)
+		{
+			best = max(best, high - low);
+			low = prices[i];
+			high = prices[i];
+		}
+		if (prices[i] > high)
+		{ high = prices[i]; }
+	}
+
+	return max(best, high - low);
+}
+
+int maxSubarraySumCircular(vector<int>& nums) {
+	int n = nums.size();
+	int best = INT_MIN;
+	int curr = 0;
+
+	for (int i = 0; i <= n; ++i)
+	{
+		int idx = i % n;
+		curr = max(nums[idx], curr + nums[idx]);
+		best = max(best, curr);
+	}
+
+	return best;
+}
+
+int uniquePaths(int m, int n) {
+	vector<vector<int>> memo(m + 1, vector<int>(n + 1, 0));
+	memo[1][0] = 1;
+	for (int i = 1; i <= m; ++i)
+	{
+		for (int j = 1; j <= n; ++j)
+		{ memo[i][j] = memo[i - 1][j] + memo[i][j - 1]; }
+	}
+
+	return memo[m][n];
+}
+
+int uniquePathsWithObstacles(vector<vector<int>>& obstacleGrid) {
+	int m = obstacleGrid.size(), n = obstacleGrid[0].size();
+	vector<vector<int>> memo(m + 1, vector<int>(n + 1, 0));
+	memo[1][0] = 1;
+	for (int i = 1; i <= m; ++i)
+	{
+		for (int j = 1; j <= n; ++j)
+		{
+			if (obstacleGrid[i - 1][j - 1] == 1)
+				memo[i][j] = 0;
+			else
+				memo[i][j] = memo[i - 1][j] + memo[i][j - 1];
+		}
+	}
+
+	return memo[m][n];
+}
+
+int minPathSum(vector<vector<int>>& grid) {
+	int m = grid.size(), n = grid[0].size();
+
+	vector<vector<int>> memo(m + 1, vector<int>(n + 1, INT_MAX));
+	memo[1][0] = 0;
+
+	for (int i = 1; i <= m; ++i)
+	{
+		for (int j = 1; j <= n; ++j)
+		{
+			memo[i][j] =
+				min(memo[i - 1][j], memo[i][j - 1]) + grid[i - 1][j - 1];
+		}
+	}
+
+	return memo[m][n];
+}
+
+int minFallingPathSum(vector<vector<int>>& matrix) {
+	int m = matrix.size(), n = matrix[0].size();
+	vector<vector<int>> memo(m + 1, vector<int>(n + 2, INT_MAX));
+
+	int best = INT_MAX;
+	for (int i = 1; i <= m; ++i)
+	{
+		for (int j = 1; j <= n; ++j)
+		{
+			if (i == 1)
+				memo[i][j] = matrix[i - 1][j - 1];
+			else
+				memo[i][j] = min(memo[i - 1][j],
+								 min(memo[i - 1][j - 1], memo[i - 1][j + 1])) +
+							 matrix[i - 1][j - 1];
+			if (i == m)
+				best = min(best, memo[i][j]);
+		}
+	}
+
+	return best;
+}
+int maxProfitWithTransactionFee(vector<int>& prices, int fee) {
+	int n = prices.size();
+	vector<vector<int>> memo(n, vector<int>(2, 0));
+	// 0 not holding, 1 holding
+	memo[0][0] = 0;
+	memo[0][1] = -prices[0];
+
+	for (int i = 1; i < n; ++i)
+	{
+		memo[i][0] = max(memo[i - 1][0], memo[i - 1][1] + prices[i] - fee);
+		memo[i][1] = max(memo[i - 1][1], memo[i - 1][0] - prices[i]);
+	}
+
+	return memo[n - 1][0];
+}
+
+int countVowelPermutation(int n) {
+	vector<long> curr(5, 0);
+	vector<long> prev(5, 1);
+
+	long base = 1e9 + 7;
+	for (int i = 1; i < n; ++i)
+	{
+		curr[0] = ((prev[1] + prev[2]) % base + prev[4]) % base;  //'a'
+		curr[1] = (prev[0] + prev[2]) % base;					  //'e'
+		curr[2] = (prev[1] + prev[3]) % base;					  //'i'
+		curr[3] = prev[2] % base;								  //'o'
+		curr[4] = (prev[2] + prev[3]) % base;					  //'u'
+		swap(curr, prev);
+	}
+
+	int sum = 0;
+	for (int i = 0; i < 5; ++i)
+		sum = (sum + prev[i]) % base;
+
+	return sum;
+}
+
+long MOD = 1e9 + 7;
+int traverse(vector<vector<long>>& memo, int times, int target, int k) {
+	if (times <= 0 || target < times || target > times * k)
+		return 0;
+	if (memo[times][target] == -1)
+	{
+		memo[times][target] = 0;
+		for (int i = 1; i <= k; ++i)
+			memo[times][target] = (memo[times][target] +
+								   traverse(memo, times - 1, target - i, k)) %
+								  MOD;
+	}
+	return memo[times][target];
+}
+
+int numRollsToTarget(int n, int k, int target) {
+	vector<vector<long>> memo(n + 1, vector<long>(k + 1, -1));
+
+	for (int i = 1; i <= target; ++i)
+		memo[1][i] = 1;
+
+	return traverse(memo, n, target, k);
+}
+
+int numTilings(int n) {
+	int m = max(n + 1, 4);
+	vector<int> memo(m, 0);
+	memo[1] = 1;
+	memo[2] = 2;
+	memo[3] = 5;
+
+	for (int i = 4; i <= n; ++i)
+		memo[i] += (memo[i - 1] + 2 * memo[i - 2] + 2 * memo[i - 3]) % MOD;
+	return memo[n];
+}
+
+bool traverse(string& s1,
+			  string& s2,
+			  string& s3,
+			  int i,
+			  int j,
+			  vector<vector<int>>& memo) {
+	if (i == s3.length())
+		return true;
+
+	int k = i - j;
+
+	if (memo[i][j] == 0)
+		return false;
+	if (memo[i][j] == 1)
+		return true;
+
+	bool res = false;
+
+	cout << "traverse " << i << " " << j << endl;
+
+	if (res == false && j < s1.length() && s1[j] == s3[i])
+		res = traverse(s1, s2, s3, i + 1, j + 1, memo);
+	if (res == false && k < s2.length() && s2[k] == s3[i])
+		res = traverse(s1, s2, s3, i + 1, j, memo);
+	memo[i][j] = res ? 1 : 0;
+
+	return res;
+}
+
+bool isInterleave(string s1, string s2, string s3) {
+	int n = s1.length(), m = s2.length(), k = s3.length();
+	if (n + m != k)
+		return false;
+
+	vector<vector<int>> memo(k, vector<int>(n, -1));
+
+	return traverse(s1, s2, s3, 0, 0, memo);
+}
+
 int main() {
 	PriorityQueue mQueue(2);
 	vector<int> nums{3, 2, 1, 5, 6, 4};
@@ -1924,5 +2142,12 @@ int main() {
 	cout << minCostII({{1, 5, 3}, {2, 9, 4}}) << endl;
 
 	cout << numDecodings("12") << endl;
+
+	cout << countVowelPermutation(5) << endl;
+
+	cout << numRollsToTarget(1, 6, 3) << endl;
+
+	cout << (isInterleave("aabcc", "dbbca", "aadbbcbcac") ? "true" : "false")
+		 << endl;
 	return 0;
 }
