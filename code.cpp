@@ -2111,7 +2111,7 @@ bool traverse(string& s1,
 
 	bool res = false;
 
-	cout << "traverse " << i << " " << j << endl;
+	// cout << "traverse " << i << " " << j << endl;
 
 	if (res == false && j < s1.length() && s1[j] == s3[i])
 		res = traverse(s1, s2, s3, i + 1, j + 1, memo);
@@ -2130,6 +2130,92 @@ bool isInterleave(string s1, string s2, string s3) {
 	vector<vector<int>> memo(k, vector<int>(n, -1));
 
 	return traverse(s1, s2, s3, 0, 0, memo);
+}
+
+class UnionFind {
+public:
+	UnionFind(int n) : root(n), rank(n, 1) {
+		for (int i = 0; i < n; ++i)
+			root[i] = i;
+	}
+
+	int FindRoot(int i) {
+		vector<int> path;
+
+		int curr = i;
+		int parent = root[i];
+		while (parent != curr)
+		{
+			path.push_back(parent);
+			curr = parent;
+			parent = root[curr];
+		}
+
+		for (auto num : path)
+
+			root[num] = curr;
+
+		root[i] = curr;
+		return curr;
+	}
+
+	void UnionSet(int i, int j) {
+		int parent_i = FindRoot(i);
+		int parent_j = FindRoot(j);
+		if (parent_i != parent_j)
+		{
+			int rank_i = rank[parent_i];
+			int rank_j = rank[parent_j];
+
+			if (rank_i > rank_j)
+				root[parent_j] = parent_i;
+			else if (rank_i < rank_j)
+				root[parent_i] = parent_j;
+			else
+			{
+				root[parent_j] = parent_i;
+				rank[parent_i] += 1;
+			}
+		}
+	}
+
+	bool Connected(int i, int j) { return FindRoot(i) == FindRoot(j); }
+
+	int GroupCount() {
+		set<int> uniqueRoot;
+		int cnt = 0;
+		for (int i = 0; i < root.size(); ++i)
+		{
+			int r = FindRoot(i);
+			if (!uniqueRoot.count(r))
+			{
+				uniqueRoot.insert(r);
+				++cnt;
+			}
+		}
+
+		return cnt;
+	}
+
+private:
+	vector<int> root;
+	vector<int> rank;
+};
+
+int findCircleNum(vector<vector<int>>& isConnected) {
+	int n = isConnected.size();
+
+	UnionFind unionFind(n);
+	for (int x = 0; x < n; ++x)
+	{
+		for (int y = x + 1; y < n; ++y)
+		{
+			if (isConnected[x][y] == 1)
+				unionFind.UnionSet(x, y);
+		}
+	}
+
+	return unionFind.GroupCount();
 }
 
 int main() {
