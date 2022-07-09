@@ -421,6 +421,314 @@ bool leadsToDestination(int n,
 
 }  // namespace DFS
 
+namespace BFS
+{
+bool validPath(int n, vector<vector<int>>& edges, int source, int destination) {
+	vector<vector<int>> neighbours(n);
+
+	for (auto edge : edges)
+	{
+		neighbours[edge[0]].push_back(edge[1]);
+		neighbours[edge[1]].push_back(edge[0]);
+	}
+
+	vector<bool> visited(n, false);
+	queue<int> nextNodes;
+	nextNodes.push(source);
+
+	while (!nextNodes.empty())
+	{
+		int cur = nextNodes.front();
+		nextNodes.pop();
+
+		if (cur == destination)
+			return true;
+
+		visited[cur] = true;
+
+		for (auto node : neighbours[cur])
+		{
+			if (!visited[node])
+				nextNodes.push(node);
+		}
+	}
+	return false;
+}
+
+vector<vector<int>> allPathsSourceTarget(vector<vector<int>>& graph) {
+	int n = graph.size();
+	vector<vector<int>> allPaths;
+
+	queue<vector<int>> curPaths;
+	curPaths.push({0});
+
+	vector<bool> visited(n, false);
+
+	while (!curPaths.empty())
+	{
+		vector<int> cur = curPaths.front();
+		curPaths.pop();
+
+		fill(visited.begin(), visited.end(), false);
+		for (auto node : cur)
+			visited[node] = true;
+
+		for (auto node : graph[cur.back()])
+		{
+			if (node == n - 1)
+			{
+				vector<int> path(cur);
+				path.push_back(n - 1);
+				allPaths.push_back(path);
+			}
+			else if (!visited[node])
+			{
+				vector<int> path(cur);
+				path.push_back(node);
+				curPaths.push(path);
+			}
+		}
+	}
+
+	return allPaths;
+}
+
+// Definition for a Node.
+class Node {
+public:
+	int val;
+	Node* left;
+	Node* right;
+	Node* next;
+
+	Node() : val(0), left(NULL), right(NULL), next(NULL) {}
+
+	Node(int _val) : val(_val), left(NULL), right(NULL), next(NULL) {}
+
+	Node(int _val, Node* _left, Node* _right, Node* _next)
+		: val(_val), left(_left), right(_right), next(_next) {}
+};
+
+Node* connect(Node* root) {
+	queue<Node*> curLevel;
+	queue<Node*> nextLevel;
+
+	curLevel.push(root);
+
+	while (!curLevel.empty())
+	{
+		Node* cur = curLevel.front();
+		curLevel.pop();
+
+		if (cur == nullptr)
+			break;
+		Node* curRight = curLevel.empty() ? nullptr : curLevel.front();
+
+		cur->right = curRight;
+
+		nextLevel.push(cur->left);
+		nextLevel.push(cur->right);
+
+		if (curLevel.empty())
+			swap(curLevel, nextLevel);
+	}
+
+	return root;
+}
+
+struct Point {
+	int x;
+	int y;
+	Point(int _x, int _y) : x(_x), y(_y) {}
+};
+
+int shortestPathBinaryMatrix(vector<vector<int>> grid) {
+	int n = grid.size();
+	vector<vector<bool>> visited(n, vector<bool>(n, false));
+
+	vector<Point> directions{{-1, 0}, {-1, -1}, {0, -1}, {1, -1},
+							 {1, 0},  {1, 1},	{0, 1},	 {-1, 1}};
+
+	queue<Point> curLevel;
+	queue<Point> nextLevel;
+
+	if (grid[0][0] == 1)
+		return -1;
+	curLevel.push({0, 0});
+	int depth = 1;
+
+	while (!curLevel.empty())
+	{
+		Point cur = curLevel.front();
+		curLevel.pop();
+		visited[cur.x][cur.y] = true;
+
+		if (cur.x == n - 1 && cur.y == n - 1)
+			return depth;
+
+		for (auto dir : directions)
+		{
+			int x = cur.x + dir.x;
+			int y = cur.y + dir.y;
+			if (x < 0 || y < 0 || x >= n || y >= n)
+				continue;
+
+			if (!visited[x][y] && grid[x][y] == 0)
+			{
+				nextLevel.push({x, y});
+				visited[x][y] = true;
+			}
+		}
+
+		if (curLevel.empty())
+		{
+			swap(curLevel, nextLevel);
+			++depth;
+		}
+	}
+
+	return depth;
+}
+
+int orangesRotting(vector<vector<int>> grid) {
+	vector<int> direction{-1, 0, 1, 0, -1};
+
+	int cnt = 0;
+	int time = 0;
+	queue<vector<int>> curLevel;
+
+	int n = grid.size(), m = grid[0].size();
+	for (int x = 0; x < n; ++x)
+	{
+		for (int y = 0; y < m; ++y)
+		{
+			if (grid[x][y] == 2)
+				curLevel.push({x, y});
+			else if (grid[x][y] == 1)
+				++cnt;
+		}
+	}
+
+	queue<vector<int>> nextLevel;
+	while (!curLevel.empty())
+	{
+		vector<int> cur = curLevel.front();
+		curLevel.pop();
+		for (int i = 0; i < 4; ++i)
+		{
+			int x = cur[0] + direction[i];
+			int y = cur[1] + direction[i + 1];
+			if (x < 0 || y < 0 || x >= n || y >= m || grid[x][y] != 1)
+				continue;
+
+			nextLevel.push({x, y});
+			grid[x][y] = 2;
+			--cnt;
+		}
+
+		if (curLevel.empty() && !nextLevel.empty())
+		{
+			++time;
+			swap(curLevel, nextLevel);
+		}
+	}
+
+	return cnt == 0 ? time : -1;
+}
+
+}  // namespace BFS
+
+namespace MST
+{
+int FindRoot(vector<int>& roots, int node) {
+	int root = roots[node];
+	vector<int> path;
+	while (root != roots[root])
+	{
+		path.push_back(root);
+		root = roots[root];
+	}
+
+	for (auto p : path)
+		roots[p] = root;
+
+	roots[node] = root;
+	return root;
+}
+
+int minCostConnectPoints(vector<vector<int>> points) {
+	multimap<int, vector<int>> edges;
+
+	int n = points.size();
+	vector<int> roots(n);
+	for (int i = 0; i < n; ++i)
+		roots[i] = i;
+
+	for (int i = 0; i < n; ++i)
+	{
+		for (int j = i + 1; j < n; ++j)
+			edges.insert(
+				pair<int, vector<int>>(abs(points[i][0] - points[j][0]) +
+										   abs(points[i][1] - points[j][1]),
+									   {i, j}));
+	}
+
+	int cost = 0;
+	for (auto it = edges.begin(); it != edges.end(); ++it)
+	{
+		int left = FindRoot(roots, (*it).second[0]);
+		int right = FindRoot(roots, (*it).second[1]);
+
+		if (left != right)
+		{
+			cost += (*it).first;
+			roots[(*it).second[1]] = left;
+			roots[right] = left;
+			--n;
+			if (n == 1)
+				break;
+		}
+	}
+
+	return cost;
+}
+
+class DSU {
+private:
+	vector<int> parent, rank;
+
+public:
+	DSU(int n) {
+		parent.resize(n);
+		iota(begin(parent), end(parent), 0);
+		rank.resize(n, 1);
+	}
+	int find_parent(int node) {
+		if (node == parent[node])
+			return node;
+		return parent[node] = find_parent(parent[node]);
+	}
+	void Union(int u, int v) {
+		int U = find_parent(u), V = find_parent(v);
+		if (U == V)
+			return;
+		if (rank[U] < rank[V])
+			swap(U, V);
+		rank[U] += rank[V];
+		parent[V] = U;
+	}
+};
+
+}  // namespace MST
+
 int main() {
+	cout << BFS::shortestPathBinaryMatrix({{0, 0, 0}, {1, 1, 0}, {1, 1, 0}})
+		 << endl;
+
+	cout << BFS::orangesRotting({{2, 1, 1}, {1, 1, 1}, {0, 1, 2}}) << endl;
+
+	cout << MST::minCostConnectPoints(
+				{{7, 18}, {-15, 19}, {-18, -15}, {-7, 14}, {4, 1}, {-6, 3}})
+		 << endl;
 	return 0;
 }
