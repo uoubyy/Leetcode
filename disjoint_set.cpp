@@ -876,6 +876,53 @@ int findCheapestPrice(
 	return dp[k][dst] == INT_MAX ? -1 : dp[k][dst];
 }
 
+int findCheapestPriceI(
+	int n, vector<vector<int>> flights, int src, int dst, int k) {
+	vector<vector<pair<int, int>>> edges(n);
+
+	for (auto flight : flights)
+	{
+		int c1 = flight[0];
+		int c2 = flight[1];
+		int price = flight[2];
+
+		edges[c2].push_back({c1, price});
+	}
+
+	vector<int> curr(n, INT_MAX);
+	vector<int> prev(n, INT_MAX);
+	prev[src] = 0;
+	curr[src] = 0;
+
+	k++;
+	while (k--)
+	{
+		bool changed = false;
+		for (int i = 0; i < n; ++i)
+		{
+			for (auto flight : edges[i])
+			{
+				int c1 = flight.first;
+				int c2 = i;
+				int price = flight.second;
+
+				if (prev[c1] != INT_MAX && prev[c1] + price < curr[c2])
+				{
+					curr[c2] = prev[c1] + price;
+					changed = true;
+				}
+			}
+		}
+
+		swap(prev, curr);
+
+		if (!changed)
+			break;
+	}
+
+	return prev[dst] == INT_MAX ? -1 : prev[dst];
+}
+
 }  // namespace SSSP
 
 int main() {
@@ -895,13 +942,27 @@ int main() {
 				5, 1)
 		 << endl;
 
-	cout << SSSP::findCheapestPrice(4,
-									{{0, 1, 100},
-									 {1, 2, 100},
-									 {2, 0, 100},
-									 {1, 3, 600},
-									 {2, 3, 200}},
-									0, 3, 1)
+	cout << SSSP::findCheapestPriceI(7,
+									 {{0, 3, 7},
+									  {4, 5, 3},
+									  {6, 4, 8},
+									  {2, 0, 10},
+									  {6, 5, 6},
+									  {1, 2, 2},
+									  {2, 5, 9},
+									  {2, 6, 8},
+									  {3, 6, 3},
+									  {4, 0, 10},
+									  {4, 6, 8},
+									  {5, 2, 6},
+									  {1, 4, 3},
+									  {4, 1, 6},
+									  {0, 5, 10},
+									  {3, 1, 5},
+									  {4, 3, 1},
+									  {5, 4, 10},
+									  {0, 1, 6}},
+									 2, 4, 1)
 		 << endl;
 	return 0;
 }
