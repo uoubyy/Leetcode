@@ -829,16 +829,51 @@ int networkDelayTime(vector<vector<int>> times, int n, int k) {
 		int travelTime = time[2];
 
 		adj[source].push_back({travelTime, dest});
-
-		vector<int> signalReceivedAt(n + 1, INT_MAX);
-		dijkstra(signalReceivedAt, k, n);
-
-		int ans = INT_MAX;
-		for (int i = 1; i <= n; ++i)
-			ans = max(ans, signalReceivedAt[i]);
-
-		return ans == INT_MAX ? -1 : ans;
 	}
+	vector<int> signalReceivedAt(n + 1, INT_MAX);
+	dijkstra(signalReceivedAt, k, n);
+
+	int ans = INT_MAX;
+	for (int i = 1; i <= n; ++i)
+		ans = max(ans, signalReceivedAt[i]);
+
+	return ans == INT_MAX ? -1 : ans;
+}
+
+int findCheapestPrice(
+	int n, vector<vector<int>> flights, int src, int dst, int k) {
+	k++;
+	vector<vector<int>> dp(k + 1, vector<int>(n, INT_MAX));
+
+	for (int i = 0; i <= k; ++i)
+		dp[i][src] = 0;
+
+	while (true)
+	{
+		bool changed = false;
+		for (auto flight : flights)
+		{
+			int c1 = flight[0];
+			int c2 = flight[1];
+			int price = flight[2];
+
+			for (int i = 1; i <= k; ++i)
+			{
+				if (dp[i - 1][c1] == INT_MAX)
+					continue;
+
+				if (dp[i][c2] > (dp[i - 1][c1] + price))
+				{
+					changed = true;
+					dp[i][c2] = dp[i - 1][c1] + price;
+				}
+			}
+		}
+		if (!changed)
+			break;
+	}
+
+	return dp[k][dst] == INT_MAX ? -1 : dp[k][dst];
 }
 
 }  // namespace SSSP
@@ -858,6 +893,15 @@ int main() {
 				 {5, 1, 34}, {3, 1, 79}, {5, 3, 2},	 {1, 2, 59}, {4, 3, 46},
 				 {5, 4, 44}, {2, 5, 89}, {4, 5, 21}, {1, 3, 86}, {4, 1, 95}},
 				5, 1)
+		 << endl;
+
+	cout << SSSP::findCheapestPrice(4,
+									{{0, 1, 100},
+									 {1, 2, 100},
+									 {2, 0, 100},
+									 {1, 3, 600},
+									 {2, 3, 200}},
+									0, 3, 1)
 		 << endl;
 	return 0;
 }
