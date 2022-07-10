@@ -736,6 +736,113 @@ public:
 
 }  // namespace MST
 
+namespace SSSP
+{
+/*
+int networkDelayTime(vector<vector<int>> times, int n, int k) {
+	vector<int> cost(n + 1, INT_MAX);
+	cost[k] = 0;
+
+	int curr = k;
+	vector<bool> visited(n + 1, false);
+	visited[k] = true;
+
+	vector<vector<int>> edges(n + 1, vector<int>(n + 1, INT_MAX));
+	for (auto time : times)
+		edges[time[0]][time[1]] = time[2];
+
+	while (true)
+	{
+		visited[curr] = true;
+		for (int i = 1; i <= n; ++i)
+		{
+			// for all the nodes connected
+			// update the shortest path cost
+			if (!visited[i] && edges[curr][i] != INT_MAX)
+				cost[i] = min(cost[i], cost[curr] + edges[curr][i]);
+		}
+
+		// find the next start node
+		int best = INT_MAX;
+
+		for (int i = 1; i <= n; ++i)
+		{
+			if (!visited[i] && cost[i] < best)
+			{
+				best = cost[i];
+				curr = i;
+			}
+		}
+
+		if (best == INT_MAX)
+			break;
+	}
+
+	int delay = 0;
+	for (int i = 1; i <= n; ++i)
+		delay = max(delay, cost[i]);
+
+	return delay == INT_MAX ? -1 : delay;
+}
+*/
+vector<pair<int, int>> adj[101];
+void dijkstra(vector<int>& signalReceivedAt, int source, int n) {
+	priority_queue<pair<int, int>, vector<pair<int, int>>,
+				   greater<pair<int, int>>>
+		pq;
+
+	pq.push({0, source});
+
+	// time for starting node is 0
+	signalReceivedAt[source] = 0;
+
+	while (!pq.empty())
+	{
+		int currNodeTime = pq.top().first;
+		int currNode = pq.top().second;
+		pq.pop();
+
+		if (currNodeTime > signalReceivedAt[currNode])
+			continue;
+
+		// broadcast the signal to adjacent nodes
+		for (pair<int, int> edge : adj[currNode])
+		{
+			int time = edge.first;
+			int neighborNode = edge.second;
+
+			if (signalReceivedAt[neighborNode] > currNodeTime + time)
+			{
+				signalReceivedAt[neighborNode] = currNodeTime + time;
+				pq.push({signalReceivedAt[neighborNode], neighborNode});
+			}
+		}
+	}
+}
+
+int networkDelayTime(vector<vector<int>> times, int n, int k) {
+	// build the adjacent list
+	for (vector<int> time : times)
+	{
+		int source = time[0];
+		int dest = time[1];
+		int travelTime = time[2];
+
+		adj[source].push_back({travelTime, dest});
+
+		vector<int> signalReceivedAt(n + 1, INT_MAX);
+		dijkstra(signalReceivedAt, k, n);
+
+		int ans = INT_MAX;
+		for (int i = 1; i <= n; ++i)
+			ans = max(ans, signalReceivedAt[i]);
+
+		return ans == INT_MAX ? -1 : ans;
+	}
+}
+
+}  // namespace SSSP
+
 int main() {
 	cout << BFS::shortestPathBinaryMatrix({{0, 0, 0}, {1, 1, 0}, {1, 1, 0}})
 		 << endl;
@@ -743,6 +850,14 @@ int main() {
 	cout << BFS::orangesRotting({{2, 1, 1}, {1, 1, 1}, {0, 1, 2}}) << endl;
 
 	cout << MST::minCostConnectPoints({{0, 0}, {2, 2}, {3, 10}, {5, 2}, {7, 0}})
+		 << endl;
+
+	cout << SSSP::networkDelayTime(
+				{{2, 4, 10}, {5, 2, 38}, {3, 4, 33}, {4, 2, 76}, {3, 2, 64},
+				 {1, 5, 54}, {1, 4, 98}, {2, 3, 61}, {2, 1, 0},	 {3, 5, 77},
+				 {5, 1, 34}, {3, 1, 79}, {5, 3, 2},	 {1, 2, 59}, {4, 3, 46},
+				 {5, 4, 44}, {2, 5, 89}, {4, 5, 21}, {1, 3, 86}, {4, 1, 95}},
+				5, 1)
 		 << endl;
 	return 0;
 }
