@@ -640,57 +640,72 @@ int orangesRotting(vector<vector<int>> grid) {
 
 namespace MST
 {
-int FindRoot(vector<int>& roots, int node) {
-	int root = roots[node];
-	vector<int> path;
-	while (root != roots[root])
-	{
-		path.push_back(root);
-		root = roots[root];
-	}
+class Edge {
+public:
+	int cost;
+	int point1;
+	int point2;
 
-	for (auto p : path)
-		roots[p] = root;
+	Edge(int _cost, int _p1, int _p2) : cost(_cost), point1(_p1), point2(_p2) {}
+};
 
-	roots[node] = root;
-	return root;
+bool operator<(const Edge& e1, const Edge& e2) {
+	return e1.cost > e2.cost;
 }
 
 int minCostConnectPoints(vector<vector<int>> points) {
-	multimap<int, vector<int>> edges;
-
 	int n = points.size();
-	vector<int> roots(n);
-	for (int i = 0; i < n; ++i)
-		roots[i] = i;
+	vector<bool> memo(n, false);
+	memo[0] = true;
+	vector<int> visited;
+	visited.push_back(0);
+
+	vector<priority_queue<Edge>> edges(n);
 
 	for (int i = 0; i < n; ++i)
 	{
-		for (int j = i + 1; j < n; ++j)
-			edges.insert(
-				pair<int, vector<int>>(abs(points[i][0] - points[j][0]) +
-										   abs(points[i][1] - points[j][1]),
-									   {i, j}));
-	}
-
-	int cost = 0;
-	for (auto it = edges.begin(); it != edges.end(); ++it)
-	{
-		int left = FindRoot(roots, (*it).second[0]);
-		int right = FindRoot(roots, (*it).second[1]);
-
-		if (left != right)
+		for (int j = 0; j < n; ++j)
 		{
-			cost += (*it).first;
-			roots[(*it).second[1]] = left;
-			roots[right] = left;
-			--n;
-			if (n == 1)
-				break;
+			if (i != j)
+			{
+				int cost = abs(points[i][0] - points[j][0]) +
+						   abs(points[i][1] - points[j][1]);
+				edges[i].push(Edge(cost, i, j));
+			}
 		}
 	}
 
-	return cost;
+	int sum = 0;
+	while (n > 1)
+	{
+		int best = INT_MAX;
+		int idx = -1;
+		for (int i = 0; i < visited.size(); ++i)
+		{
+			while (!edges[visited[i]].empty())
+			{
+				Edge edge = edges[visited[i]].top();
+				if (memo[edge.point2])
+				{ edges[visited[i]].pop(); }
+				else
+				{
+					if (edge.cost < best)
+					{
+						best = edge.cost;
+						idx = edge.point2;
+					}
+					break;
+				}
+			}
+		}
+
+		sum += best;
+		memo[idx] = true;
+		visited.push_back(idx);
+		--n;
+	}
+
+	return sum;
 }
 
 class DSU {
@@ -727,8 +742,7 @@ int main() {
 
 	cout << BFS::orangesRotting({{2, 1, 1}, {1, 1, 1}, {0, 1, 2}}) << endl;
 
-	cout << MST::minCostConnectPoints(
-				{{7, 18}, {-15, 19}, {-18, -15}, {-7, 14}, {4, 1}, {-6, 3}})
+	cout << MST::minCostConnectPoints({{0, 0}, {2, 2}, {3, 10}, {5, 2}, {7, 0}})
 		 << endl;
 	return 0;
 }
