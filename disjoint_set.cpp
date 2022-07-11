@@ -910,6 +910,119 @@ int findCheapestPriceI(
 	return prev[dst] == INT_MAX ? -1 : prev[dst];
 }
 
+struct Cell {
+	bool dirty;
+	int effort;
+
+	Cell() : dirty(false), effort(INT_MAX) {}
+	Cell(int _x, int _y) : dirty(false), effort(INT_MAX) {}
+};
+
+bool operator<(const Cell& left, const Cell& right) {
+	return left.effort < right.effort;
+}
+
+int minimumEffortPath(vector<vector<int>> heights) {
+	int n = heights.size(), m = heights[0].size();
+
+	vector<vector<Cell>> memo(n, vector<Cell>(m));
+	memo[0][0].effort = 0;
+
+	queue<vector<int>> cells;
+	vector<int> directions{-1, 0, 1, 0, -1};
+
+	cells.push({0, 0});
+
+	while (!cells.empty())
+	{
+		vector<int> curr = cells.front();
+		cells.pop();
+		memo[curr[0]][curr[1]].dirty = false;
+
+		for (int i = 0; i < 4; ++i)
+		{
+			int x = curr[0] + directions[i];
+			int y = curr[1] + directions[i + 1];
+			if (x < 0 || y < 0 || x >= n || y >= m)
+				continue;
+
+			int effort = abs(heights[curr[0]][curr[1]] - heights[x][y]);
+			effort = max(memo[curr[0]][curr[1]].effort, effort);
+
+			if (effort < memo[x][y].effort)
+			{
+				memo[x][y].effort = effort;
+				if (!memo[x][y].dirty)
+				{
+					memo[x][y].dirty = true;
+					cells.push({x, y});
+				}
+			}
+		}
+	}
+
+	return memo[n - 1][m - 1].effort;
+}
+
+struct Course {
+	int prevCnt;
+	vector<int> children;
+};
+
+bool operator<(const Course& left, const Course& right) {
+	return left.prevCnt < right.prevCnt;
+}
+
+vector<int> findOrder(int numCourses, vector<vector<int>> prerequisites) {
+	vector<int> res;
+
+	vector<Course> courses(numCourses);
+
+	for (auto require : prerequisites)
+	{
+		courses[require[0]].prevCnt++;
+		courses[require[1]].children.push_back(require[0]);
+	}
+
+	queue<int> currLevel;
+	queue<int> nextLevel;
+	vector<bool> visited(numCourses, false);
+
+	for (int i = 0; i < numCourses; ++i)
+	{
+		if (courses[i].prevCnt == 0)
+			currLevel.push(i);
+	}
+
+	while (!currLevel.empty())
+	{
+		int id = currLevel.front();
+		currLevel.pop();
+
+		Course curr = courses[id];
+		visited[id] = true;
+
+		numCourses--;
+
+		res.push_back(id);
+		for (auto child : curr.children)
+		{
+			courses[child].prevCnt--;
+			if (courses[child].prevCnt == 0 && !visited[child])
+				nextLevel.push(child);
+		}
+
+		if (currLevel.empty())
+
+			swap(currLevel, nextLevel);
+	}
+
+	if (numCourses != 0)
+		return {};
+
+	return res;
+}
+
 }  // namespace SSSP
 
 int main() {
@@ -951,5 +1064,14 @@ int main() {
 									  {0, 1, 6}},
 									 2, 4, 1)
 		 << endl;
+
+	cout << SSSP::minimumEffortPath({{1, 2, 1, 1, 1},
+									 {1, 2, 1, 2, 1},
+									 {1, 2, 1, 2, 1},
+									 {1, 2, 1, 2, 1},
+									 {1, 1, 1, 2, 1}})
+		 << endl;
+
+	print_vector<int>(SSSP::findOrder(4, {{1, 0}, {2, 0}, {3, 1}, {3, 2}}));
 	return 0;
 }
