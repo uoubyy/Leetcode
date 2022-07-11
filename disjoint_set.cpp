@@ -878,17 +878,6 @@ int findCheapestPrice(
 
 int findCheapestPriceI(
 	int n, vector<vector<int>> flights, int src, int dst, int k) {
-	vector<vector<pair<int, int>>> edges(n);
-
-	for (auto flight : flights)
-	{
-		int c1 = flight[0];
-		int c2 = flight[1];
-		int price = flight[2];
-
-		edges[c2].push_back({c1, price});
-	}
-
 	vector<int> curr(n, INT_MAX);
 	vector<int> prev(n, INT_MAX);
 	prev[src] = 0;
@@ -898,19 +887,17 @@ int findCheapestPriceI(
 	while (k--)
 	{
 		bool changed = false;
-		for (int i = 0; i < n; ++i)
-		{
-			for (auto flight : edges[i])
-			{
-				int c1 = flight.first;
-				int c2 = i;
-				int price = flight.second;
 
-				if (prev[c1] != INT_MAX && prev[c1] + price < curr[c2])
-				{
-					curr[c2] = prev[c1] + price;
-					changed = true;
-				}
+		for (auto flight : flights)
+		{
+			int c1 = flight[0];
+			int c2 = flight[1];
+			int price = flight[2];
+
+			if (prev[c1] != INT_MAX && prev[c1] + price < curr[c2])
+			{
+				curr[c2] = prev[c1] + price;
+				changed = true;
 			}
 		}
 
